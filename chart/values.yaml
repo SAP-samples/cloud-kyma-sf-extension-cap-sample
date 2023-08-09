@@ -1,0 +1,88 @@
+global:
+  domain: fa222c1.kyma.ondemand.com
+  imagePullSecret:
+    {}
+srv:
+  bindings:
+    db:
+      fromSecret: cloud-sf-extension-cap-sample-caphana
+    destination:
+      serviceInstanceName: destination
+    uaa:
+      serviceInstanceName: xsuaa
+    messaging:
+      serviceInstanceName: event-mesh
+  image:
+    repository: sahuamit127/cloud-sf-extension-cap-sample-srv
+    tag: latest
+  resources:
+    limits:
+      ephemeral-storage: 1G
+      memory: 500M
+    requests:
+      ephemeral-storage: 1G
+      cpu: 500m
+      memory: 500M
+  health:
+    liveness:
+      path: /
+    readiness:
+      path: /
+hana_deployer:
+  image:
+    repository: sahuamit127/cloud-sf-extension-cap-sample-hana-deployer
+    tag: latest
+  bindings:
+    hana:
+      fromSecret: cloud-sf-extension-cap-sample-caphana
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 1G
+    requests:
+      cpu: 1000m
+      memory: 1G
+destination:
+  serviceOfferingName: destination
+  servicePlanName: lite
+  parameters:
+    version: 1.0.0
+    HTML5Runtime_enabled: true
+xsuaa:
+  serviceOfferingName: xsuaa
+  servicePlanName: application
+  parameters:
+    xsappname: cloud-sf-extension-cap-sample
+  config: xs-security.json
+
+event_mesh:
+  serviceOfferingName: enterprise-messaging
+  servicePlanName: default
+  config: event-mesh.json  
+html5_apps_deployer:
+  cloudService: notifications
+  backendDestinations:
+    srv-binding:
+      service: srv
+  image:
+    repository: sahuamit127/cloud-sf-extension-cap-sample-html5-deployer
+    tag: latest
+  bindings:
+    xsuaa:
+      serviceInstanceName: xsuaa
+    destination:
+      serviceInstanceName: destination
+    html5_apps_repo:
+      serviceInstanceName: html5-apps-repo-host
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 1G
+    requests:
+      cpu: 1000m
+      memory: 1G
+
+html5_apps_repo_host:
+  serviceOfferingName: html5-apps-repo
+  servicePlanName: app-host      
+

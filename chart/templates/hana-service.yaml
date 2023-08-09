@@ -1,0 +1,19 @@
+apiVersion: services.cloud.sap.com/v1alpha1
+kind: ServiceInstance
+metadata:
+  name: cloud-sf-extension-cap-sample-caphana
+spec:
+  serviceOfferingName: hana
+  servicePlanName: hdi-shared
+  externalName: hdi-shared-instance
+
+---
+
+apiVersion: services.cloud.sap.com/v1alpha1
+kind: ServiceBinding
+metadata:
+  name: cloud-sf-extension-cap-sample-caphana-binding
+spec:
+  serviceInstanceName: cloud-sf-extension-cap-sample-caphana
+  externalName: cloud-sf-extension-cap-sample-caphana
+  secretName: cloud-sf-extension-cap-sample-caphana

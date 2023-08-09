@@ -1,0 +1,31 @@
+{
+  "emname": "cloud-sf-extension-cap-sample-emname",
+  "version": "1.1.0",
+  "namespace": "default/sap.myapp/1",
+  "options": {
+    "management": true,
+    "messagingrest": true,
+    "messaging": true
+  },
+  "rules": {
+    "topicRules": {
+      "publishFilter": [
+        "${namespace}/sample"
+      ],
+      "subscribeFilter": [
+        "*"
+      ]
+    },
+    "queueRules": {
+      "publishFilter": [
+        "${namespace}/*"
+      ],
+      "subscribeFilter": [
+        "${namespace}/*"
+      ]
+    }
+  },
+  "authorities": [
+    "$ACCEPT_GRANTED_AUTHORITIES"
+  ]
+}

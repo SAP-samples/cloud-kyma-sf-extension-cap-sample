@@ -1,0 +1,231 @@
+ID: cloud-sf-extension-cap-sample
+_schema-version: '2.1'
+parameters:
+  deploy_mode: html5-repo
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm install
+        - npx -p @sap/cds-dk cds build --production
+version: 1.0.0
+description: Successfactors Extension Application
+modules:
+  #####################################################################################################################
+  # Database Module
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample-db
+    type: hdb
+    path: gen/db
+    parameters:
+      memory: 256M
+      disk-quota: 512M
+    requires:
+      # Hana Container
+      - name: cloud-sf-extension-cap-sample-db-hdi-container
+  #####################################################################################################################
+  # Business Service Module
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample-srv
+    deployed-after:
+      - cloud-sf-extension-cap-sample-db
+    type: nodejs
+    path: gen/srv
+    parameters:
+      memory: 512M
+      disk-quota: 512M
+    provides:
+      - name: srv_api
+        properties:
+          url: '${default-url}'
+    requires:
+      # Hana Conatiner
+      - name: cloud-sf-extension-cap-sample-db-hdi-container
+      # Authentication and Authorization service
+      - name: cloud-sf-extension-cap-sample-uaa
+      # Destination service
+      - name: cloud-sf-extension-cap-sample-ui-destination
+      # Enterprise Messaging service
+      - name: cloud-sf-extension-cap-sample-epm
+  #####################################################################################################################
+  # Launchpad Module
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample-launchpad
+    # path: cloud-sf-extension-cap-sample-launchpad
+    type: com.sap.application.content
+    # deployed-after:
+    #   - cloud-sf-extension-cap-sample_ui_deployer
+    requires:
+      - name: cloud-sf-extension-cap-sample-uaa
+        parameters:
+          service-key:
+            name: cloud-sf-extension-cap-sample-uaa-key
+      - name: cloud-sf-extension-cap-sample_html5_repo_host
+        parameters:
+          service-key:
+            name: cloud-sf-extension-cap-sample_html5_repo_host-key
+      - name: srv_api
+      - name: cloud-sf-extension-cap-sample-ui-destination
+        parameters:
+          content-target: true
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: cloud-sf-extension-cap-sample-srv
+              TokenServiceInstanceName: cloud-sf-extension-cap-sample-uaa
+              TokenServiceKeyName: cloud-sf-extension-cap-sample-srv-key
+              URL: ~{srv_api/url}
+              sap.cloud.service: sap.sf
+            - Name: cloud-sf-extension-cap-sample_html5_repo_host
+              ServiceInstanceName: cloud-sf-extension-cap-sample_html5_repo_host
+              ServiceKeyName: cloud-sf-extension-cap-sample_html5_repo_host-key
+              sap.cloud.service: sap.sf
+            - Authentication: OAuth2UserTokenExchange
+              Name: cloud-sf-extension-cap-sample-uaa
+              ServiceInstanceName: cloud-sf-extension-cap-sample-uaa
+              ServiceKeyName: cloud-sf-extension-cap-sample-uaa-key
+              sap.cloud.service: sap.sf
+          existing_destinations_policy: update
+    build-parameters:
+      no-source: true
+  - name: sf-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: cloud-sf-extension-cap-sample_html5_repo_host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - notifications.zip
+          name: notifications
+          target-path: resources/
+        - artifacts:
+            - projects.zip
+          name: projects
+          target-path: resources/
+
+  #####################################################################################################################
+  # UI Application Projects Module
+  #####################################################################################################################
+  - name: projects
+    type: html5
+    path: app/projects
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      supported-platforms: []
+      build-result: dist
+  #####################################################################################################################
+  # UI Application Notifications Module
+  #####################################################################################################################
+  - name: notifications
+    type: html5
+    path: app/notifications
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      supported-platforms: []
+      build-result: dist
+
+resources:
+  #####################################################################################################################
+  # HTML5 Repository Runtime Service
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample_html5_repo_runtime
+    parameters:
+      service-plan: app-runtime
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+    
+  #####################################################################################################################
+  # HTML5 Repository Host Service
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample_html5_repo_host
+    parameters:
+      service-plan: app-host
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+
+  #####################################################################################################################
+  # Hana Service
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample-db-hdi-container
+    type: com.sap.xs.hdi-container
+    parameters:
+     service: hana
+     service-plan: hdi-shared
+    properties:
+      hdi-container-name: '${service-name}'
+      
+  #####################################################################################################################
+  # Authentication and authorization service
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample-uaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: application
+      service: xsuaa
+      config:
+        xsappname: 'cloud-sf-extension-cap-sample-uaa-${org}-${space}'
+        tenant-mode: dedicated
+        scopes:
+          - name: uaa.user
+            description: UAA
+        role-templates:
+          - name: Token_Exchange
+            description: UAA
+            scope-references:
+              - uaa.user
+  #####################################################################################################################
+  # Destination Service
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample-ui-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-plan: lite
+
+  #####################################################################################################################
+  # Enterprise Messaging Service
+  #####################################################################################################################
+  - name: cloud-sf-extension-cap-sample-epm
+    parameters:
+      path: ./enterprisemessage.json
+      service: enterprise-messaging
+      service-plan: default
+    type: org.cloudfoundry.managed-service
+
+  #####################################################################################################################
+  # SuccessFactors Extensibility Service
+  #####################################################################################################################
+  - name: sfextension-service
+    type: org.cloudfoundry.managed-service
+    #type: org.cloudfoundry.existing-service
+    parameters:
+      service: sap-successfactors-extensibility
+      service-plan: api-access
+      config:
+        systemName: SFPART064287 # <-- Provide your system name "SFPART046183" is dummy name
+        technicalUser: sfadmin
