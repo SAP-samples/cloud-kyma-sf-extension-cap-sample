@@ -1,12 +1,13 @@
 # SAP SucessFactors Extension Application - "Run Smooth"
 
+[![REUSE status](https://api.reuse.software/badge/github.com/sap-samples/cloud-kyma-sf-extension-cap-sample)](https://api.reuse.software/info/github.com/sap-samples/cloud-kyma-sf-extension-cap-sample)
 
 ## Description:
-`Run Smooth` is a reference application which showcases how to build an event driven extensions for SAP SuccessFactors using the capabilities provided by [SAP Cloud Platform Extension Factory](https://help.sap.com/viewer/7b98ddc13f8d4a3ba08a74042a0baa7f/Cloud/en-US). This solution is developed by extending the Employee Central module of SAP SuccessFactors to build an event driven application.
+`Run Smooth` is a reference application which showcases how to build an event driven extensions for SAP SuccessFactors using the capabilities provided by [SAP BTP Extension Suite](https://help.sap.com/viewer/7b98ddc13f8d4a3ba08a74042a0baa7f/Cloud/en-US). This solution is developed by extending the Employee Central module of SAP SuccessFactors to build an event driven application.
 
 This application showcases:
-1. Capabilities of SAP Cloud Platform Extension Factory
-2. Building application on SAP Cloud Platform using SAP Cloud Application Programming Model(CAP)
+1. Capabilities of SAP BTP Extension Suite
+2. Building application on SAP BTP using SAP Cloud Application Programming Model(CAP)
 3. Building and Event driven extension application using SAP CP Enterprise Messaging
 4. Consuming REST API's from SAP SuccessFactors using SAP CP Destination Service
 5. SCI(IAS) Tenant integration with SF
@@ -29,7 +30,7 @@ A Manager maintains in the Run Smooth application the staffing details of all th
 
 ![solution diagram](./documentation/images/SolutionDiagram.PNG)
 
-The Run Smooth application is developed using [SAP Cloud Application programming Model (CAP)](https://cap.cloud.sap/docs/) and runs on the SAP Cloud Platform, Cloud Foundry Environment. It consumes platform services like Enterprise Messaging, SAP HANA and Destination. The events generated in SuccessFactors are inserted into the Enterprise messaging queue. The application running in Cloud Foundry polls the queue for these messages and inserts them into the HANA database. The run smooth application also makes calls to SF OData APIs to get SF data.
+The Run Smooth application is developed using [SAP Cloud Application programming Model (CAP)](https://cap.cloud.sap/docs/) and runs on the SAP BTP, Cloud Foundry Environment. It consumes platform services like Enterprise Messaging, SAP HANA and Destination. The events generated in SuccessFactors are inserted into the Enterprise messaging queue. The application running in Cloud Foundry polls the queue for these messages and inserts them into the HANA database. The run smooth application also makes calls to SF OData APIs to get SF data.
 
 > Note: SAP fiori elements floorplans for OData V4 is in Lab preview and would be GA later this year.
 
@@ -52,9 +53,9 @@ If sap-registry is set in your system please delete by using below command.
 
 ## Configuration
 
-### Step 1: Configure trust between SF and SAP CP using Extension Factory
+### Step 1: Configure trust between SF and SAP CP using Extension Suite
 
- Follow steps 1, 2 and 4 from this [document](https://help.sap.com/viewer/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/9e33934540c44681817567d6072effb2.html) to set up trust and destination to access SuccessFactors system using Extension Factory.
+ Follow steps 1, 2 and 4 from this [document](https://help.sap.com/viewer/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/9e33934540c44681817567d6072effb2.html) to set up trust and destination to access SuccessFactors system using Extension Suite.
 > Ignore step 3 in the document as the service instance creation is automatically done when the application is deployed as MTA.
 
 ### Step 2: Download the EDMX files
